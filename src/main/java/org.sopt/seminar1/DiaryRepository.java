@@ -9,30 +9,28 @@ import java.util.concurrent.atomic.AtomicLong;
 // 디비와 커넥션을 하는 역할이 레포지토리
 
 public class DiaryRepository {
-    private final Map<Long, String> storage = new ConcurrentHashMap<>();
+    private final Map<Long, Diary> storage = new ConcurrentHashMap<>();
     private final AtomicLong numbering = new AtomicLong();
 
     // 일기 저장 메서드
     void save(final Diary diary) {
         // 채반 과정
         final long id = numbering.addAndGet(1);
+
         // 저장 과정
-        storage.put(id, diary.getBody()); // 이게 원래 디비의 역할
+        storage.put(id, diary); // 이게 원래 디비의 역할
     }
 
     // 모든 일기 조회 메서드
     List<Diary> findAll() {
-        // 1 | diary 담을 자료구조
         final List<Diary> diaryList = new ArrayList<>();
 
-        // 2 | 저장한 값을 불러오는 반복 구조
-        for(long index = 1; index <= numbering.longValue(); index++) {
-            final String body = storage.get(index);
-            // 2-1 | 불러온 값을 구성한 자료구조로 이관
-            diaryList.add(new Diary(index, body));
+        for (long index = 1; index <= numbering.longValue(); index++) {
+            Diary diary = storage.get(index);
+            if (diary != null) {
+                diaryList.add(diary);
+            }
         }
-
-        // 3 | 불러온 자료구조를 응답
         return diaryList;
     }
 
@@ -43,10 +41,20 @@ public class DiaryRepository {
 
     // ID로 일기 수정 메서드
     boolean updateById(final long id, final String newBody) {
-        if (storage.containsKey(id)) {
-            storage.put(id, newBody);
-            return true;
+        Diary diary = storage.get(id);
+
+        if (diary != null) {
+            diary.resetModificationCountIfNeeded();
+
+            if (diary.getModificationCount() < 2) { // 하루에 2번 미만일 때만 수정 허용
+                diary.updateBody(newBody);
+                System.out.println("일기 ID: " + id + " 수정 횟수: " + diary.getModificationCount());
+                return true;
+            } else {
+                System.out.println("일기 ID: " + id + " 수정 불가 (하루에 2번 초과)");
+                return false; // 하루에 2번 이상 수정 불가
+            }
         }
-        return false;
+        return false; // ID에 해당하는 일기가 없는 경우
     }
 }
