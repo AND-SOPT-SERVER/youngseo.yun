@@ -3,7 +3,7 @@ package org.sopt.seminar1;
 import java.time.LocalDateTime;
 
 public class Diary {
-    private final Long id;
+    private Long id;
     private String body;
     private LocalDateTime lastModified;  // 마지막 수정 시간
     private int modificationCount;       // 하루에 몇 번 수정했는지 기록
@@ -13,6 +13,11 @@ public class Diary {
         this.body = body;
         this.lastModified = LocalDateTime.now(); // 생성 시점을 기록
         this.modificationCount = 0; // 처음엔 수정 횟수 0
+    }
+
+    // id 설정 메서드
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getId() {

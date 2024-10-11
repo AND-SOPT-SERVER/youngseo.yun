@@ -15,7 +15,8 @@ public class DiaryRepository {
     // 일기 저장 메서드
     void save(final Diary diary) {
         // 채반 과정
-        final long id = numbering.addAndGet(1);
+        final long id = numbering.addAndGet(1); // ID 자동 증가
+        diary.setId(id); // Diary 객체에 ID 설정
 
         // 저장 과정
         storage.put(id, diary); // 이게 원래 디비의 역할
