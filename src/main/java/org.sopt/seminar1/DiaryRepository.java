@@ -40,22 +40,18 @@ public class DiaryRepository {
         return storage.remove(id) != null; // ID로 삭제, 성공하면 true 반환
     }
 
-    // ID로 일기 수정 메서드
+    // ID로 일기 수정 메서드 (수정 횟수 및 글자 수 제한은 Service에서 처리)
     boolean updateById(final long id, final String newBody) {
         Diary diary = storage.get(id);
-
         if (diary != null) {
-            diary.resetModificationCountIfNeeded();
-
-            if (diary.getModificationCount() < 2) { // 하루에 2번 미만일 때만 수정 허용
-                diary.updateBody(newBody);
-                System.out.println("일기 ID: " + id + " 수정 횟수: " + diary.getModificationCount());
-                return true;
-            } else {
-                System.out.println("일기 ID: " + id + " 수정 불가 (하루에 2번 초과)");
-                return false; // 하루에 2번 이상 수정 불가
-            }
+            diary.updateBody(newBody); // 일기 내용 수정
+            return true;
         }
         return false; // ID에 해당하는 일기가 없는 경우
+    }
+
+    // ID로 일기 검색 메서드
+    Diary findById(final long id) {
+        return storage.get(id); // 저장된 일기 반환
     }
 }
